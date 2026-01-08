@@ -1,0 +1,8 @@
+[core]
+	autocrlf = input
+	editor = nvim
+	pager = less -F -X -j.5iR
+[rerere]
+	enabled = true
+[init]
+	defaultBranch = main
