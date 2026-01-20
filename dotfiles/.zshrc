@@ -9,8 +9,13 @@ bindkey -e
 # so bind them like this to avoid the issue
 bindkey '^P' history-search-backward
 bindkey '^N' history-search-forward
-# fix weird bug iterm2 tmux where delete inserts ~
-bindkey '^[[3~' delete-char
+
+# Fix keys for tmux/iTerm2 (explicit bindings)
+bindkey '^[[3~' delete-char           # Delete
+bindkey '^[[1~' beginning-of-line     # Home
+bindkey '^[[4~' end-of-line           # End
+bindkey '^[[5~' up-line-or-history    # PageUp
+bindkey '^[[6~' down-line-or-history  # PageDown
 
 # append commands to history file immediately (not at end of session)
 precmd() {
@@ -22,3 +27,8 @@ export PATH="$HOME/.local/bin:$PATH"
 
 # Set up fzf key bindings and fuzzy completion
 source <(fzf --zsh)
+
+
+# add autocompletions path 
+fpath=(~/.oh-my-zsh/completions $fpath)
+autoload -U compinit && compinit
