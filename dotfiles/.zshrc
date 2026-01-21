@@ -32,3 +32,6 @@ source <(fzf --zsh)
 # add autocompletions path 
 fpath=(~/.oh-my-zsh/completions $fpath)
 autoload -U compinit && compinit
+
+# make history avaiable inmediate for all the terminals
+setopt SHARE_HISTORY
