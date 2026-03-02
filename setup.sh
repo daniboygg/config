@@ -8,7 +8,7 @@ case "${OS}" in
         echo "Work in progress..."
         ;;
     Darwin*)
-        brew install stow fzf neovim ripgrep hammerspoon
+        brew install stow fzf neovim ripgrep hammerspoon hyperfine
         ;;
     *)
         echo "Unsupported OS: ${OS}"
