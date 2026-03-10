@@ -21,5 +21,9 @@ stow dotfiles -t $HOME/
 
 # useful scripts
 stow scripts/ -t $HOME/.local/bin/
+if [ -d "config-sherpany/scripts/" ]; then
+    echo "### Installing private config..."
+    stow --dir=config-sherpany scripts/ -t $HOME/.local/bin/
+fi
 
 
