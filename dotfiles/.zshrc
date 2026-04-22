@@ -16,6 +16,8 @@ bindkey '^[[1~' beginning-of-line     # Home
 bindkey '^[[4~' end-of-line           # End
 bindkey '^[[5~' up-line-or-history    # PageUp
 bindkey '^[[6~' down-line-or-history  # PageDown
+bindkey '^[[1;3D' backward-word       # Alt+left
+bindkey '^[[1;3C' forward-word        # Alt+right
 
 # append commands to history file immediately (not at end of session)
 precmd() {
