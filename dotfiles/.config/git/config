@@ -1,7 +1,8 @@
 [core]
 	autocrlf = input
 	editor = nvim
-	pager = less -F -X -j.5iR
+	#pager = less -F -X -j.5iR
+	pager = delta
 [rerere]
 	enabled = true
 [init]
