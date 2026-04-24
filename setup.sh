@@ -8,7 +8,16 @@ case "${OS}" in
         echo "Work in progress..."
         ;;
     Darwin*)
-        brew install stow fzf neovim ripgrep hammerspoon hyperfine
+        brew install \
+          stow \
+          fzf \
+          neovim \
+          ripgrep \
+          hammerspoon \
+          hyperfine \
+          hyperfine \
+          git-delta \
+          lazygit \
         ;;
     *)
         echo "Unsupported OS: ${OS}"
