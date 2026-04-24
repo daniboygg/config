@@ -37,3 +37,9 @@ autoload -U compinit && compinit
 
 # make history avaiable inmediate for all the terminals
 setopt SHARE_HISTORY
+
+# some programs do not use the correct defaults but respect this variable
+# if this variable was not defined it's supposed to fall back to this one ~/.config
+# adding here the default value for those cases
+# ref: https://specifications.freedesktop.org/basedir/latest/#variables
+export XDG_CONFIG_HOME="$HOME/.config"
