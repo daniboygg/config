@@ -18,7 +18,6 @@ case "${OS}" in
           hyperfine \
           git-delta \
           lazygit \
-          flameshot \
         ;;
     *)
         echo "Unsupported OS: ${OS}"
