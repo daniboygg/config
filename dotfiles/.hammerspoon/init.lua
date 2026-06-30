@@ -1,4 +1,4 @@
-local utils = require("functions")
+local utils = require("utils")
 
 -- Hyper key definition (Ctrl+Option+Shift)
 -- Check karabiner "Change caps_lock to right shift+ctrl+option." rule
