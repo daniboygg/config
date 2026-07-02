@@ -18,6 +18,11 @@ case "${OS}" in
           hyperfine \
           git-delta \
           lazygit \
+          rectangle
+
+        # Configuration for rectangle, it does not use regular
+        mkdir -p "${HOME}/Library/Application Support/Rectangle"
+        cp rectangle/RectangleConfig.json "${HOME}/Library/Application Support/Rectangle/RectangleConfig.json"
         ;;
     *)
         echo "Unsupported OS: ${OS}"
@@ -26,7 +31,7 @@ case "${OS}" in
 esac
 
 # link dot files to proper paths
-stow dotfiles -t $HOME/
+stow dotfiles -t "${HOME}/"
 
 # useful scripts
 stow scripts/ -t $HOME/.local/bin/
@@ -35,5 +40,3 @@ stow scripts/ -t $HOME/.local/bin/
 if [ -f "config-sherpany/setup.sh" ]; then
     bash config-sherpany/setup.sh
 fi
-
-
