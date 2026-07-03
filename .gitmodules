@@ -1,3 +1,7 @@
 [submodule "config-sherpany"]
 	path = config-sherpany
 	url = git@github.com:daniboygg/config-sherpany.git
+
+[submodule "config-personal"]
+	path = config-personal
+	url = git@github.com:daniboygg/config-personal.git
