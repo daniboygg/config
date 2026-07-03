@@ -5,7 +5,14 @@ OS="$(uname -s)"
 
 case "${OS}" in
     Linux*)
-        echo "Work in progress..."
+        sudo apt-get install \
+          stow \
+          fzf \
+          ripgrep \
+          hyperfine \
+          tmux \
+          git-delta \
+          sqlitebrowser
         ;;
     Darwin*)
         brew install \
@@ -14,7 +21,6 @@ case "${OS}" in
           neovim \
           ripgrep \
           hammerspoon \
-          hyperfine \
           hyperfine \
           git-delta \
           lazygit \
@@ -39,4 +45,9 @@ stow scripts/ -t $HOME/.local/bin/
 # install private config
 if [ -f "config-sherpany/setup.sh" ]; then
     bash config-sherpany/setup.sh
+fi
+
+# install private config
+if [ -f "config-personal/setup.sh" ]; then
+    bash config-personal/setup.sh
 fi
