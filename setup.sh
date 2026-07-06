@@ -26,7 +26,7 @@ case "${OS}" in
           lazygit \
           rectangle
 
-        # Configuration for rectangle, it does not use regular
+        # Configuration for rectangle, it does not use regular xdg directory specification
         mkdir -p "${HOME}/Library/Application Support/Rectangle"
         cp rectangle/RectangleConfig.json "${HOME}/Library/Application Support/Rectangle/RectangleConfig.json"
         ;;
