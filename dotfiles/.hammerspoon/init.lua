@@ -14,7 +14,7 @@ hs.hotkey.bind(hyper, ";", utils.focusOrLaunch("Slack"))
 -- Change [i]nput layout keyboard
 hs.hotkey.bind(hyper, "i", utils.cycleKeyboardLayout)
 -- Move window [p]osition to left [h] and right [l] or [m]aximize
-local windowSequenceHotkey = utils.sequenceHotkey(hyper, "w")
+local windowSequenceHotkey = utils.sequenceHotkey(hyper, "p")
 windowSequenceHotkey.add("h", utils.rectangleAction("previous-display"))
 windowSequenceHotkey.add("l", utils.rectangleAction("next-display"))
 windowSequenceHotkey.add("m", utils.rectangleAction("maximize"))
