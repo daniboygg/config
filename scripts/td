@@ -1,0 +1,350 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.14"
+# dependencies = [
+#   "requests>=2.32.0",
+# ]
+# ///
+
+import argparse
+import json
+import os
+import stat
+import subprocess
+import sys
+from enum import StrEnum
+from pathlib import Path
+from typing import Any
+
+import requests
+import tomllib
+
+DATA_DIR = Path.home() / ".local" / "share" / "td"
+SETTINGS_PATH = DATA_DIR / "settings.toml"
+
+
+class TdError(RuntimeError):
+    pass
+
+
+class Command(StrEnum):
+    INIT = "init"
+    REVIEW = "review"
+    DEPLOY = "deploy"
+
+
+def create_settings_template() -> None:
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+    if SETTINGS_PATH.exists():
+        print(f"Settings file already exists: {SETTINGS_PATH}")
+        return
+
+    template = """[todoist]
+# Required: your Todoist API token.
+token = ""
+
+# Required: Todoist project ID where tasks should be created.
+project_id = ""
+"""
+
+    SETTINGS_PATH.write_text(template, encoding="utf-8")
+    SETTINGS_PATH.chmod(stat.S_IRUSR | stat.S_IWUSR)
+
+    print(f"Created settings template: {SETTINGS_PATH}")
+    print("Edit this file and fill in todoist.token and todoist.project_id.")
+
+
+def ask_to_create_settings_template() -> None:
+    print(f"No settings file found at: {SETTINGS_PATH}")
+    answer = input("Create a template settings file now? [y/N] ").strip().lower()
+
+    if answer in {"y", "yes"}:
+        create_settings_template()
+        raise SystemExit(0)
+
+    raise TdError(
+        "Settings file is required.\n\n"
+        f"Create it manually with:\n"
+        f"td init\n\n"
+        f"Expected path:\n{SETTINGS_PATH}"
+    )
+
+
+def load_settings() -> dict[str, Any]:
+    if not SETTINGS_PATH.exists():
+        ask_to_create_settings_template()
+
+    try:
+        with SETTINGS_PATH.open("rb") as file:
+            settings = tomllib.load(file)
+    except tomllib.TOMLDecodeError as toml_error:
+        raise TdError(f"Invalid TOML in {SETTINGS_PATH}\n\n{toml_error}")
+
+    todoist = settings.get("todoist")
+    if not isinstance(todoist, dict):
+        raise TdError(
+            f"Missing [todoist] section in {SETTINGS_PATH}\n\n"
+            "Expected:\n\n"
+            "[todoist]\n"
+            'token = "..."\n'
+            'project_id = "..."'
+        )
+
+    return settings
+
+
+def setting_or_env(
+    settings: dict[str, Any],
+    env_name: str,
+    key: str,
+) -> str:
+    env_value = os.environ.get(env_name)
+    if env_value and env_value.strip():
+        return env_value.strip()
+
+    value = settings.get("todoist", {}).get(key)
+    if isinstance(value, str) and value.strip():
+        return value.strip()
+
+    raise TdError(
+        f"Missing required Todoist value: {key}\n\n"
+        f"Set environment variable {env_name}, or edit:\n{SETTINGS_PATH}"
+    )
+
+
+def run_gh_pr_view(pr_url: str) -> dict[str, Any]:
+    command = [
+        "gh",
+        "pr",
+        "view",
+        pr_url,
+        "--json",
+        "title,url,headRepository,author",
+    ]
+
+    try:
+        result = subprocess.run(
+            command,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except FileNotFoundError:
+        raise TdError(
+            "Required command not found: gh\n\n"
+            "Please install `gh` and try again."
+        )
+    except subprocess.CalledProcessError as gh_error:
+        details = gh_error.stderr.strip() or gh_error.stdout.strip() or "No output from gh."
+
+        raise TdError(
+            "Failed to read PR data using GitHub CLI.\n\n"
+            "Check that:\n"
+            "- `gh` is authenticated: gh auth status\n"
+            "- you have access to the repository\n"
+            "- the argument is something `gh pr view` can understand\n\n"
+            f"Details:\n{details}"
+        )
+
+    try:
+        data = json.loads(result.stdout)
+    except json.JSONDecodeError:
+        raise TdError(f"Could not parse GitHub CLI output as JSON:\n\n{result.stdout}")
+
+    if not isinstance(data, dict):
+        raise TdError(f"GitHub CLI returned unexpected JSON:\n\n{result.stdout}")
+
+    if not data.get("title"):
+        raise TdError("GitHub CLI response did not include a PR title.")
+
+    if not data.get("url"):
+        raise TdError("GitHub CLI response did not include a PR URL.")
+
+    repository = data.get("headRepository")
+    if not isinstance(repository, dict):
+        raise TdError("GitHub CLI response did not include repository data.")
+
+    if not repository.get("nameWithOwner"):
+        raise TdError("GitHub CLI response did not include headRepository.nameWithOwner.")
+
+    author = data.get("author")
+    if not isinstance(author, dict):
+        raise TdError("GitHub CLI response did not include author data.")
+
+    if not author.get("login"):
+        raise TdError("GitHub CLI response did not include author.login.")
+
+    return data
+
+
+def make_review_task(pr_url: str) -> dict[str, Any]:
+    pr = run_gh_pr_view(pr_url)
+
+    repo = pr["headRepository"]["nameWithOwner"]
+    author = pr["author"]["login"]
+    title = pr["title"]
+    url = pr["url"]
+
+    content = f"code review: `{repo}` from `{author}` {title}"
+
+    return {
+        "content": content,
+        "description": url,
+    }
+
+
+def make_deploy_task(pr_url: str) -> dict[str, Any]:
+    pr = run_gh_pr_view(pr_url)
+
+    repo = pr["headRepository"]["nameWithOwner"]
+    title = pr["title"]
+    url = pr["url"]
+
+    content = f"deploy: `{repo}` {title}"
+
+    return {
+        "content": content,
+        "description": url,
+    }
+
+
+def make_task(command: Command, pr_url: str) -> dict[str, Any]:
+    match command:
+        case Command.REVIEW:
+            return make_review_task(pr_url)
+        case Command.DEPLOY:
+            return make_deploy_task(pr_url)
+        case _:
+            raise TdError(f"Unsupported task command: {command}")
+
+
+def make_todoist_payload(project_id: str, task: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "content": task["content"],
+        "description": task["description"],
+        "project_id": project_id,
+        "due_string": "today",
+    }
+
+
+def create_todoist_task(
+    token: str,
+    payload: dict[str, Any],
+) -> dict[str, Any]:
+    response = requests.post(
+        "https://api.todoist.com/api/v1/tasks",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
+        },
+        json=payload,
+        timeout=20,
+    )
+
+    if response.status_code >= 400:
+        raise TdError(
+            f"Todoist API request failed with HTTP {response.status_code}.\n\n"
+            f"Response:\n{response.text}"
+        )
+
+    try:
+        data = response.json()
+    except json.JSONDecodeError:
+        raise TdError(f"Todoist returned invalid JSON:\n\n{response.text}")
+
+    if not isinstance(data, dict):
+        raise TdError(f"Todoist returned unexpected JSON:\n\n{response.text}")
+
+    return data
+
+
+def parse_command(value: str) -> Command:
+    try:
+        return Command(value)
+    except ValueError:
+        allowed = ", ".join(command.value for command in Command)
+        raise TdError(f"Unknown command: {value}\n\nAllowed commands: {allowed}")
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        prog="td",
+        description="Create Todoist engineering tasks from GitHub PRs.",
+    )
+
+    parser.add_argument(
+        "command",
+        help="Command to run: init, review, deploy.",
+    )
+
+    parser.add_argument(
+        "target",
+        nargs="?",
+        help="GitHub PR reference passed directly to gh pr view.",
+    )
+
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Print the Todoist payload without creating a task.",
+    )
+
+    return parser.parse_args()
+
+
+def main() -> int:
+    args = parse_args()
+    command = parse_command(args.command)
+
+    if command == Command.INIT:
+        create_settings_template()
+        return 0
+
+    if not args.target:
+        raise TdError(f"Missing target for command: {command.value}")
+
+    settings = load_settings()
+
+    token = setting_or_env(
+        settings=settings,
+        env_name="TODOIST_TOKEN",
+        key="token",
+    )
+
+    project_id = setting_or_env(
+        settings=settings,
+        env_name="TODOIST_PROJECT_ID",
+        key="project_id",
+    )
+
+    task = make_task(
+        command=command,
+        pr_url=args.target,
+    )
+    payload = make_todoist_payload(project_id=project_id, task=task)
+
+    if args.dry_run:
+        print(json.dumps(payload, indent=2, ensure_ascii=False))
+        return 0
+
+    created = create_todoist_task(
+        token=token,
+        payload=payload,
+    )
+
+    print(f'Created: {created["content"]}')
+    print(f'Task ID: {created["id"]}')
+
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except KeyboardInterrupt:
+        print("\nCancelled.", file=sys.stderr)
+        raise SystemExit(130)
+    except TdError as td_error:
+        print(f"td error: {td_error}", file=sys.stderr)
+        raise SystemExit(1)
