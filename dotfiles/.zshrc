@@ -43,3 +43,8 @@ setopt SHARE_HISTORY
 # adding here the default value for those cases
 # ref: https://specifications.freedesktop.org/basedir/latest/#variables
 export XDG_CONFIG_HOME="$HOME/.config"
+
+# Load optional Sherpany shell config when the private submodule is present.
+if [ -r "$HOME/projects/config/config-sherpany/.zshrc" ]; then
+    source "$HOME/projects/config/config-sherpany/.zshrc"
+fi
