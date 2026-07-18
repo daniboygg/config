@@ -5,13 +5,12 @@ OS="$(uname -s)"
 
 case "${OS}" in
     Linux*)
-        sudo apt-get install \
+        sudo apt-get install -y \
           stow \
           fzf \
           ripgrep \
           hyperfine \
           tmux \
-          git-delta \
           sqlitebrowser
         ;;
     Darwin*)
