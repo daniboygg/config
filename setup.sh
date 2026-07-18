@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/lib.sh"
+
 OS="$(uname -s)"
 
+step "${CYAN}" "Installing dependencies"
 case "${OS}" in
     Linux*)
-        sudo apt-get install -y \
+        sudo apt-get install -qq -y \
           stow \
           fzf \
           ripgrep \
@@ -37,6 +41,8 @@ case "${OS}" in
         exit 1
         ;;
 esac
+
+step "${CYAN}" "Configuring dotfiles"
 
 # link dot files to proper paths
 stow dotfiles -t "${HOME}/"

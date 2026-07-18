@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../lib.sh"
+
 GODOT_VERSION="4.6.2"
 GODOT_DIR="/opt/godot"
 GODOT_BIN="${GODOT_DIR}/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if [ ! -f "${GODOT_BIN}" ]; then
-    echo "Godot ${GODOT_VERSION} not found, downloading..."
+    step "${YELLOW}" "Godot ${GODOT_VERSION} not found, downloading..."
     TMP_ZIP="$(mktemp --suffix=.zip)"
     curl -fL --progress-bar -o "${TMP_ZIP}" \
         "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
