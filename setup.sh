@@ -11,7 +11,10 @@ case "${OS}" in
           ripgrep \
           hyperfine \
           tmux \
-          sqlitebrowser
+          sqlitebrowser \
+          unzip
+
+        godot/install.sh
         ;;
     Darwin*)
         brew install \
