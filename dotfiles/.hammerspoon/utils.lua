@@ -93,6 +93,38 @@ function M.sequenceHotkey(mods, key)
     return sequence
 end
 
+-- Swap the frontmost window on each of two screens (e.g. left has Chrome,
+-- right has Slack -> after swap, left has Slack, right has Chrome).
+function M.swapWindowsBetweenScreens()
+    local screens = hs.screen.allScreens()
+    if #screens ~= 2 then
+        hs.alert.show("Swap needs exactly 2 screens")
+        return
+    end
+
+    -- Topmost non-minimized standard window per screen, by z-order.
+    local windowByScreenId = {}
+    for _, win in ipairs(hs.window.orderedWindows()) do
+        if win:isStandard() and not win:isMinimized() then
+            local screenId = win:screen():id()
+            if not windowByScreenId[screenId] then
+                windowByScreenId[screenId] = win
+            end
+        end
+    end
+
+    local screenA, screenB = screens[1], screens[2]
+    local winA, winB = windowByScreenId[screenA:id()], windowByScreenId[screenB:id()]
+
+    if not winA or not winB then
+        hs.alert.show("Could not find a window on each screen")
+        return
+    end
+
+    winA:moveToScreen(screenB)
+    winB:moveToScreen(screenA)
+end
+
 function M.rectangleAction(name)
     return function()
         hs.task.new("/usr/bin/open", nil, {"-g", "rectangle://execute-action?name=" .. name}):start()
