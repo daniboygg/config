@@ -21,7 +21,7 @@ case "${OS}" in
         godot/install.sh
         ;;
     Darwin*)
-        brew install \
+        NONINTERACTIVE=1 brew install --quiet \
           stow \
           fzf \
           neovim \
@@ -59,3 +59,5 @@ fi
 if [ -f "config-personal/setup.sh" ]; then
     bash config-personal/setup.sh
 fi
+
+step "${GREEN}" "Done, let's go!"
