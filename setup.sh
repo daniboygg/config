@@ -30,6 +30,7 @@ case "${OS}" in
           hyperfine \
           git-delta \
           lazygit \
+          pnpm \
           rectangle
 
         # Configuration for rectangle, it does not use regular xdg directory specification
