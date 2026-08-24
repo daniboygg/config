@@ -12,7 +12,7 @@ import os
 import stat
 import subprocess
 import sys
-from enum import StrEnum
+from enum import IntEnum, StrEnum
 from pathlib import Path
 from typing import Any
 
@@ -31,6 +31,13 @@ class Command(StrEnum):
     INIT = "init"
     REVIEW = "review"
     DEPLOY = "deploy"
+
+
+class TodoistPriority(IntEnum):
+    PRIORITY_1 = 4
+    PRIORITY_2 = 3
+    PRIORITY_3 = 2
+    PRIORITY_4 = 1
 
 
 def create_settings_template() -> None:
@@ -191,6 +198,7 @@ def make_review_task(pr_url: str) -> dict[str, Any]:
     return {
         "content": content,
         "description": url,
+        "priority": TodoistPriority.PRIORITY_3,
     }
 
 
@@ -220,12 +228,17 @@ def make_task(command: Command, pr_url: str) -> dict[str, Any]:
 
 
 def make_todoist_payload(project_id: str, task: dict[str, Any]) -> dict[str, Any]:
-    return {
+    payload = {
         "content": task["content"],
         "description": task["description"],
         "project_id": project_id,
         "due_string": "today",
     }
+
+    if "priority" in task:
+        payload["priority"] = task["priority"]
+
+    return payload
 
 
 def create_todoist_task(
