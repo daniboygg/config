@@ -19,6 +19,15 @@ case "${OS}" in
           unzip
 
         godot/install.sh
+
+        # keyd must already be installed (not packaged for apt on Pop!_OS 22):
+        # it will be available in Debian 13 based, probably supported in Pop!_OS 24
+        # https://github.com/rvaiya/keyd
+        if command -v keyd >/dev/null; then
+            sudo cp keyd/default.conf /etc/keyd/default.conf
+            sudo systemctl enable --now keyd
+            sudo keyd reload
+        fi
         ;;
     Darwin*)
         NONINTERACTIVE=1 brew install --quiet \
