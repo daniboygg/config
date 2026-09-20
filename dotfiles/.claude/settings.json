@@ -1,0 +1,29 @@
+{
+  "model": "sonnet",
+  "statusLine": {
+    "type": "command",
+    "command": "bash \"$HOME/.claude/statusline.sh\""
+  },
+  "enabledPlugins": {
+    "simple-english@simple-english": true
+  },
+  "extraKnownMarketplaces": {
+    "simple-english": {
+      "source": {
+        "source": "github",
+        "repo": "AminBlg/SimpleEnglish"
+      }
+    }
+  },
+  "alwaysThinkingEnabled": true,
+  "modelSettings": {
+    "claude-opus-5": {
+      "effortLevel": "medium"
+    },
+    "claude-sonnet-5": {
+      "effortLevel": "medium"
+    }
+  },
+  "tui": "fullscreen",
+  "editorMode": "vim"
+}
