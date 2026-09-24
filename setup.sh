@@ -16,7 +16,8 @@ case "${OS}" in
           hyperfine \
           tmux \
           sqlitebrowser \
-          unzip
+          unzip \
+          jq
 
         godot/install.sh
 
@@ -40,7 +41,8 @@ case "${OS}" in
           git-delta \
           lazygit \
           pnpm \
-          rectangle
+          rectangle \
+          jq
 
         # Configuration for rectangle, it does not use regular xdg directory specification
         mkdir -p "${HOME}/Library/Application Support/Rectangle"
