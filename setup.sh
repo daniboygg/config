@@ -34,6 +34,8 @@ case "${OS}" in
         NONINTERACTIVE=1 brew install --quiet \
           stow \
           fzf \
+          tree-sitter \
+          tree-sitter-cli \
           neovim \
           ripgrep \
           hammerspoon \
