@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Claude Code statusline: model, context window usage, session/weekly rate limits.
+# Claude Code statusline: model, effort, context window usage, session/weekly rate limits.
 # Reads the statusLine JSON payload from stdin.
 
 input=$(cat)
@@ -26,6 +26,12 @@ segments=()
 model_name=$(echo "$input" | jq -r '.model.display_name // empty')
 if [ -n "$model_name" ]; then
   segments+=("$(printf "%s%s%s" "$c_grey_bold" "$model_name" "$c_reset")")
+fi
+
+# Absent when the current model does not support the effort parameter.
+effort_level=$(echo "$input" | jq -r '.effort.level // empty')
+if [ -n "$effort_level" ]; then
+  segments+=("$(printf "%sEffort:%s%s" "$c_grey" "$effort_level" "$c_reset")")
 fi
 
 context_pct=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
