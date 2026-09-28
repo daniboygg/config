@@ -25,5 +25,6 @@
     }
   },
   "tui": "fullscreen",
-  "editorMode": "vim"
+  "editorMode": "vim",
+  "model": "opus"
 }
