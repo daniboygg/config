@@ -17,9 +17,12 @@ This applies to normal chat replies, not only to documents.
 
 When you refer to a file or a line in a reply, write a clickable link:
 
-- Format: `[src/app/module.py:247](file://<repo root>/src/app/module.py#L247)`
+- Format: `[src/app/module.py:247](pycharm://open?file=<repo root>/src/app/module.py&line=247)`
 - The visible text is the path from the repo root, with `:<line>` if there is a line.
-- The target is a `file://` URL with the absolute path, and `#L<line>` if there is a line.
+- The target is a `pycharm://open?file=<absolute path>` URL, with `&line=<line>` if
+  there is a line. If there is no line, leave out `&line=`.
+- In the absolute path, write a space as `%20`.
+- Do not use a `file://` URL. It cannot carry the line number to PyCharm.
 - Get the repo root from the primary working directory, or from
   `git rev-parse --show-toplevel`. Do not guess it.
 - Do not use a bare path or `:<line>` as the link target. These links do not open.
