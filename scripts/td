@@ -34,6 +34,9 @@ class Command(StrEnum):
 
 
 class TodoistPriority(IntEnum):
+    # The Todoist API counts priorities in reverse order from the app UI.
+    # API value 4 is P1 (urgent, red) in the UI, and API value 1 is P4 (normal, no color).
+    # The member names use the UI labels. The values are what the API expects.
     PRIORITY_1 = 4
     PRIORITY_2 = 3
     PRIORITY_3 = 2
@@ -198,7 +201,7 @@ def make_review_task(pr_url: str) -> dict[str, Any]:
     return {
         "content": content,
         "description": url,
-        "priority": TodoistPriority.PRIORITY_3,
+        "priority": TodoistPriority.PRIORITY_2,
     }
 
 
@@ -214,6 +217,7 @@ def make_deploy_task(pr_url: str) -> dict[str, Any]:
     return {
         "content": content,
         "description": url,
+        "priority": TodoistPriority.PRIORITY_3,
     }
 
 
