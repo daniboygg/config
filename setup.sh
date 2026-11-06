@@ -58,6 +58,10 @@ esac
 
 step "${CYAN}" "Configuring dotfiles"
 
+# Create these dirs first. If they do not exist, stow links the whole dir
+# to this repo, and the private skills cannot be added next to it.
+mkdir -p "${HOME}/.claude/skills"
+
 # link dot files to proper paths
 stow dotfiles -t "${HOME}/"
 
